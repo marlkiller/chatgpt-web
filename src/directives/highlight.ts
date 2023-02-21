@@ -1,13 +1,19 @@
 import type { App, Directive } from 'vue'
 import hljs from 'highlight.js'
+import includeCode from '@/utils/functions/includeCode'
 
-const regexp = /^(?:\s{4}|\t).+/gm
+function highlightCode(el: HTMLElement) {
+  if (includeCode(el.textContent))
+    hljs.highlightBlock(el)
+}
 
 export default function setupHighlightDirective(app: App) {
   const highLightDirective: Directive<HTMLElement> = {
     mounted(el: HTMLElement) {
-      if (el.textContent?.indexOf(' = ') !== -1 || el.textContent.match(regexp))
-        hljs.highlightBlock(el)
+      highlightCode(el)
+    },
+    updated(el: HTMLElement) {
+      highlightCode(el)
     },
   }
 

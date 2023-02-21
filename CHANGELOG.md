@@ -1,3 +1,57 @@
+## v2.6.0
+
+`2023-02-21`
+### Feature
+- 新增对 `网页 accessToken` 调用 `ChatGPT`，更智能不过不太稳定 [#51](https://github.com/Chanzhaoyu/chatgpt-web/issues/51)
+- 前端页面设置按钮显示查看当前后端服务配置
+
+### Enhancement
+- 新增 `TIMEOUT_MS` 环境变量设定后端超时时常（单位：毫秒）[#62](https://github.com/Chanzhaoyu/chatgpt-web/issues/62)
+
+## v2.5.2
+
+`2023-02-21`
+### Feature
+- 增加对 `markdown` 格式的支持 [Demo](https://github.com/Chanzhaoyu/chatgpt-web/pull/77)
+### BugFix
+- 重载会话时滚动条保持
+
+## v2.5.1
+
+`2023-02-21`
+
+### Enhancement
+- 调整路由模式为 `hash`
+- 调整新增会话添加到
+- 调整移动端样式
+
+
+## v2.5.0
+
+`2023-02-20`
+
+### Feature
+- 会话 `loading` 现在显示为光标动画
+- 会话现在可以再次生成回复
+- 会话异常可以再次进行请求
+- 所有删除选项添加确认操作
+
+### Enhancement
+- 调整 `chat` 为路由页面而不是组件形式
+- 更新依赖至最新
+- 调整移动端体验
+
+### BugFix
+- 修复移动端左侧菜单显示不完整的问题
+
+## v2.4.1
+
+`2023-02-18`
+
+### Enhancement
+- 调整部份移动端上的样式
+- 输入框支持换行
+
 ## v2.4.0
 
 `2023-02-17`
@@ -6,6 +60,7 @@
 - 响应式支持移动端
 ### Enhancement
 - 修改部份描述错误
+
 ## v2.3.3
 
 `2023-02-16`
