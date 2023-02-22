@@ -57,7 +57,7 @@ async function chatReply(
       options = { ...lastContext }
 
     const response = await api.sendMessage(message, { ...options })
-
+    console.log({'Question:':message,'Answer:':response['text']})
     return sendResponse({ type: 'Success', data: response })
   }
   catch (error: any) {
