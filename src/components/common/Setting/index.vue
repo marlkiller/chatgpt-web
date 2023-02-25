@@ -16,6 +16,7 @@ interface ConfigState {
   timeoutMs?: number
   reverseProxy?: string
   apiModel?: string
+  socksProxy?: string
 }
 
 const props = defineProps<Props>()
@@ -63,12 +64,13 @@ watch(
         <p>
           此项目开源于
           <a class="text-blue-600" href="https://github.com/Chanzhaoyu/chatgpt-web" target="_blank">Github</a>
-          ，免费并且协议为 MIT，其他来源均为盗版，使用时请注意。如果你觉得此项目对你有帮助，请帮我点个 Star，谢谢！
+          如果你觉得此项目对你有帮助，请帮我点个 Star，谢谢！
         </p>
         <hr>
         <p>API方式：{{ config?.apiModel ?? '-' }}</p>
         <p>反向代理：{{ config?.reverseProxy ?? '-' }}</p>
         <p>超时时间：{{ config?.timeoutMs ?? '-' }}</p>
+        <p>Socks代理：{{ config?.socksProxy ?? '-' }}</p>
       </div>
     </NCard>
   </NModal>
