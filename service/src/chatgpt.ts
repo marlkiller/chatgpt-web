@@ -77,7 +77,7 @@ async function chatReply(
     return sendResponse({ type: 'Success', data: response })
   }
   catch (error: any) {
-    globalThis.console.log({ 'Question:': message, 'Fail:': error.message })
+    globalThis.console.error({ 'Question:': message, 'Fail:': error.message })
     return sendResponse({ type: 'Fail', message: error.message })
   }
 }
@@ -102,10 +102,11 @@ async function chatReplyProcess(
         process?.(partialResponse)
       },
     })
-
+    globalThis.console.log({ 'Question:': message, 'Answer:': response.text })
     return sendResponse({ type: 'Success', data: response })
   }
   catch (error: any) {
+    globalThis.console.error({ 'Question:': message, 'Fail:': error.message })
     return sendResponse({ type: 'Fail', message: error.message })
   }
 }
