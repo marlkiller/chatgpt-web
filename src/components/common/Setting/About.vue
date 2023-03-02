@@ -57,6 +57,9 @@ onMounted(() => {
       <p>反向代理：{{ config?.reverseProxy ?? '-' }}</p>
       <p>超时时间：{{ config?.timeoutMs ?? '-' }}</p>
       <p>Socks代理：{{ config?.socksProxy ?? '-' }}</p>
+      <p style="background: #00ff0d38;">
+        联系本站开发人员：<a href="mailto:marlkiller@voidm.com"> marlkiller@voidm.com </a>
+      </p>
     </div>
   </NSpin>
 </template>
