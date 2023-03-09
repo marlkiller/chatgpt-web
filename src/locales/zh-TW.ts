@@ -12,7 +12,8 @@ export default {
     wrong: '好像出錯了，請稍後再試。',
     success: '操作成功',
     failed: '操作失敗',
-    verify: '驗證',
+    register: '註冊',
+    login: '登錄',
     unauthorizedTips: '未經授權，請先進行驗證。',
   },
   chat: {

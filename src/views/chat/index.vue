@@ -49,9 +49,11 @@ async function onConversation() {
 
   controller = new AbortController()
 
+  const chatUuid = Date.now()
   addChat(
     +uuid,
     {
+      uuid: chatUuid,
       dateTime: new Date().toLocaleString(),
       text: message,
       inversion: true,
@@ -74,6 +76,7 @@ async function onConversation() {
   addChat(
     +uuid,
     {
+      uuid: chatUuid,
       dateTime: new Date().toLocaleString(),
       text: '',
       loading: true,
@@ -87,6 +90,8 @@ async function onConversation() {
 
   try {
     await fetchChatAPIProcess<Chat.ConversationResponse>({
+      roomId: +uuid,
+      uuid: chatUuid,
       prompt: message,
       options,
       signal: controller.signal,
@@ -188,7 +193,7 @@ async function onRegenerate(index: number) {
     options = { ...requestOptions.options }
 
   loading.value = true
-
+  const chatUuid = dataSources.value[index].uuid
   updateChat(
     +uuid,
     index,
@@ -205,6 +210,9 @@ async function onRegenerate(index: number) {
 
   try {
     await fetchChatAPIProcess<Chat.ConversationResponse>({
+      roomId: +uuid,
+      uuid: chatUuid || Date.now(),
+      regenerate: true,
       prompt: message,
       options,
       signal: controller.signal,

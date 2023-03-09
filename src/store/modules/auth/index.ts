@@ -5,7 +5,7 @@ import { fetchSession } from '@/api'
 
 export interface AuthState {
   token: string | undefined
-  session: { auth: boolean } | null
+  session: { auth: boolean; allowRegister: boolean } | null
 }
 
 export const useAuthStore = defineStore('auth-store', {
@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth-store', {
   actions: {
     async getSession() {
       try {
-        const { data } = await fetchSession<{ auth: boolean }>()
+        const { data } = await fetchSession<{ auth: boolean; allowRegister: boolean }>()
         this.session = { ...data }
         return Promise.resolve(data)
       }
