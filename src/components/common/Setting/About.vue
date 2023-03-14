@@ -9,6 +9,7 @@ interface ConfigState {
   reverseProxy?: string
   apiModel?: string
   socksProxy?: string
+  httpsProxy?: string
 }
 
 const loading = ref(false)
@@ -57,6 +58,7 @@ onMounted(() => {
       <p>{{ $t("setting.reverseProxy") }}：{{ config?.reverseProxy ?? '-' }}</p>
       <p>{{ $t("setting.timeout") }}：{{ config?.timeoutMs ?? '-' }}</p>
       <p>{{ $t("setting.socks") }}：{{ config?.socksProxy ?? '-' }}</p>
+      <p>{{ $t("setting.httpsProxy") }}：{{ config?.httpsProxy ?? '-' }}</p>
       <p style="background: #00ff0d38;">
         联系本站开发人员：<a href="mailto:marlkiller@voidm.com"> marlkiller@voidm.com </a>
       </p>
