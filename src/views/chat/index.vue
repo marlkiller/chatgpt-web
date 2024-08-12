@@ -4,11 +4,10 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { NAutoComplete, NButton, NInput, useDialog, useMessage } from 'naive-ui'
-import html2canvas from 'html2canvas'
+import { toPng } from 'html-to-image'
 import { Message } from './components'
 import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
-import { useCopyCode } from './hooks/useCopyCode'
 import { useUsingContext } from './hooks/useUsingContext'
 import HeaderComponent from './components/Header/index.vue'
 import { HoverButton, SvgIcon } from '@/components/common'
@@ -27,8 +26,6 @@ const ms = useMessage()
 
 const chatStore = useChatStore()
 
-useCopyCode()
-
 const { isMobile } = useBasicLayout()
 const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex } = useChat()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
@@ -37,7 +34,7 @@ const { usingContext, toggleUsingContext } = useUsingContext()
 const { uuid } = route.params as { uuid: string }
 
 const dataSources = computed(() => chatStore.getChatByUuid(+uuid))
-const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !item.error)))
+const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !!item.conversationOptions)))
 
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
@@ -96,7 +93,7 @@ async function onConversation() {
     +uuid,
     {
       dateTime: new Date().toLocaleString(),
-      text: '',
+      text: t('chat.thinking'),
       loading: true,
       inversion: false,
       error: false,
@@ -128,10 +125,10 @@ async function onConversation() {
               dataSources.value.length - 1,
               {
                 dateTime: new Date().toLocaleString(),
-                text: lastText + data.text ?? '',
+                text: lastText + (data.text ?? ''),
                 inversion: false,
                 error: false,
-                loading: false,
+                loading: true,
                 conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
                 requestOptions: { prompt: message, options: { ...options } },
               },
@@ -147,10 +144,11 @@ async function onConversation() {
             scrollToBottomIfAtBottom()
           }
           catch (error) {
-          //
+            //
           }
         },
       })
+      updateChatSome(+uuid, dataSources.value.length - 1, { loading: false })
     }
 
     await fetchChatAPIOnce()
@@ -232,7 +230,7 @@ async function onRegenerate(index: number) {
       error: false,
       loading: true,
       conversationOptions: null,
-      requestOptions: { prompt: message, ...options },
+      requestOptions: { prompt: message, options: { ...options } },
     },
   )
 
@@ -258,12 +256,12 @@ async function onRegenerate(index: number) {
               index,
               {
                 dateTime: new Date().toLocaleString(),
-                text: lastText + data.text ?? '',
+                text: lastText + (data.text ?? ''),
                 inversion: false,
                 error: false,
-                loading: false,
+                loading: true,
                 conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
-                requestOptions: { prompt: message, ...options },
+                requestOptions: { prompt: message, options: { ...options } },
               },
             )
 
@@ -279,6 +277,7 @@ async function onRegenerate(index: number) {
           }
         },
       })
+      updateChatSome(+uuid, index, { loading: false })
     }
     await fetchChatAPIOnce()
   }
@@ -306,7 +305,7 @@ async function onRegenerate(index: number) {
         error: true,
         loading: false,
         conversationOptions: null,
-        requestOptions: { prompt: message, ...options },
+        requestOptions: { prompt: message, options: { ...options } },
       },
     )
   }
@@ -328,17 +327,13 @@ function handleExport() {
       try {
         d.loading = true
         const ele = document.getElementById('image-wrapper')
-        const canvas = await html2canvas(ele as HTMLDivElement, {
-          useCORS: true,
-        })
-        const imgUrl = canvas.toDataURL('image/png')
+        const imgUrl = await toPng(ele as HTMLDivElement)
         const tempLink = document.createElement('a')
         tempLink.style.display = 'none'
         tempLink.href = imgUrl
         tempLink.setAttribute('download', 'chat-shot.png')
         if (typeof tempLink.download === 'undefined')
           tempLink.setAttribute('target', '_blank')
-
         document.body.appendChild(tempLink)
         tempLink.click()
         document.body.removeChild(tempLink)
@@ -454,7 +449,7 @@ const footerClass = computed(() => {
 
 onMounted(() => {
   scrollToBottom()
-  if (inputRef.value)
+  if (inputRef.value && !isMobile.value)
     inputRef.value?.focus()
 })
 
@@ -470,55 +465,52 @@ onUnmounted(() => {
       v-if="isMobile"
       :using-context="usingContext"
       @export="handleExport"
-      @toggle-using-context="toggleUsingContext"
+      @handle-clear="handleClear"
     />
     <main class="flex-1 overflow-hidden">
-      <div
-        id="scrollRef"
-        ref="scrollRef"
-        class="h-full overflow-hidden overflow-y-auto"
-      >
+      <div id="scrollRef" ref="scrollRef" class="h-full overflow-hidden overflow-y-auto">
         <div
-          id="image-wrapper"
           class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
           :class="[isMobile ? 'p-2' : 'p-4']"
         >
-          <template v-if="!dataSources.length">
-            <div class="flex items-center justify-center mt-4 text-center text-neutral-300">
-              <SvgIcon icon="ri:bubble-chart-fill" class="mr-2 text-3xl" />
-              <span>Aha~</span>
-            </div>
-          </template>
-          <template v-else>
-            <div>
-              <Message
-                v-for="(item, index) of dataSources"
-                :key="index"
-                :date-time="item.dateTime"
-                :text="item.text"
-                :inversion="item.inversion"
-                :error="item.error"
-                :loading="item.loading"
-                @regenerate="onRegenerate(index)"
-                @delete="handleDelete(index)"
-              />
-              <div class="sticky bottom-0 left-0 flex justify-center">
-                <NButton v-if="loading" type="warning" @click="handleStop">
-                  <template #icon>
-                    <SvgIcon icon="ri:stop-circle-line" />
-                  </template>
-                  Stop Responding
-                </NButton>
+          <div id="image-wrapper" class="relative">
+            <template v-if="!dataSources.length">
+              <div class="flex items-center justify-center mt-4 text-center text-neutral-300">
+                <SvgIcon icon="ri:bubble-chart-fill" class="mr-2 text-3xl" />
+                <span>{{ t('chat.newChatTitle') }}</span>
               </div>
-            </div>
-          </template>
+            </template>
+            <template v-else>
+              <div>
+                <Message
+                  v-for="(item, index) of dataSources"
+                  :key="index"
+                  :date-time="item.dateTime"
+                  :text="item.text"
+                  :inversion="item.inversion"
+                  :error="item.error"
+                  :loading="item.loading"
+                  @regenerate="onRegenerate(index)"
+                  @delete="handleDelete(index)"
+                />
+                <div class="sticky bottom-0 left-0 flex justify-center">
+                  <NButton v-if="loading" type="warning" @click="handleStop">
+                    <template #icon>
+                      <SvgIcon icon="ri:stop-circle-line" />
+                    </template>
+                    {{ t('common.stopResponding') }}
+                  </NButton>
+                </div>
+              </div>
+            </template>
+          </div>
         </div>
       </div>
     </main>
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto">
         <div class="flex items-center justify-between space-x-2">
-          <HoverButton @click="handleClear">
+          <HoverButton v-if="!isMobile" @click="handleClear">
             <span class="text-xl text-[#4f555e] dark:text-white">
               <SvgIcon icon="ri:delete-bin-line" />
             </span>
@@ -528,7 +520,7 @@ onUnmounted(() => {
               <SvgIcon icon="ri:download-2-line" />
             </span>
           </HoverButton>
-          <HoverButton v-if="!isMobile" @click="toggleUsingContext">
+          <HoverButton @click="toggleUsingContext">
             <span class="text-xl" :class="{ 'text-[#4b9e5f]': usingContext, 'text-[#a8071a]': !usingContext }">
               <SvgIcon icon="ri:chat-history-line" />
             </span>
